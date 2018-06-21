@@ -8,14 +8,8 @@ from time import sleep_ms
 import gc
 gc.collect()
 
-# ATTENTION PLEASE: select ESP8266 or ESP32
-#ESP32 = True
-ESP32 = False
-
 # onboard LED active level
-LED_ON = 1 if ESP32 else 0
-
-MICROPYTHON = True
+LED_ON = 1
 
 # Common registers
 REG_FIFO      = 0x00 # FIFO read/write access
