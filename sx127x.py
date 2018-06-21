@@ -263,7 +263,7 @@ class RADIO:
         # init GPIO
         if gpio['led'] != None:
           self.pin_led = gpio['led']
-          self.pin_led.value(0) # LED off
+          self.led(0)
         else:
           self.pin_led = None
           
