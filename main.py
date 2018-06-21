@@ -4,7 +4,7 @@ import gc
 from machine import Pin
 import time
 #import utime
-#import network
+import network
 #import socket
 #import framebuf
 import sx127x
