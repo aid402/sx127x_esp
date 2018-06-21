@@ -3,7 +3,6 @@
 # Author: Alex Zorg <azorg(at)mail.ru>
 # Licenced by GPLv3
 
-from machine import Pin, SPI
 from time import sleep_ms
 
 import gc
@@ -255,48 +254,58 @@ class RADIO:
                          'afc':              False, # AFC on/off
                          'fixed':            False, # fixed packet size or variable
                          'dcfree':           0},    # 0=None, 1=Manchester or 2=Whitening
-                 gpio = {'led':    2,    # blue LED GPIO number on board
-                         'reset':  5,    # reset pin from GPIO5 (or may be None)
-                         'dio0':   4,    # DIO0 line to GPIO4
-                         'cs':     15,   # SPI CS
-                         'sck':    14,   # SPI SCK
-                         'mosi':   13,   # SPI MOSI
-                         'miso':   12},  # SPI MISO
-                 spi_hardware = True,
-                 spi_baudrate = None,
+                 gpio = {'led':    None,
+                         'reset':  None,
+                         'dio0':   None,
+                         'dio1':   None,
+                         'dio2':   None,
+                         'dio3':   None,
+                         'dio4':   None,
+                         'dio5':   None,
+                         'cs':     None,},
+                 spi = None,
                  onReceive    = None): # receive callback
 
         # init GPIO
-        self.pin_led = Pin(gpio['led'], Pin.OUT)
-        self.led(0) # LED off
-        if gpio['reset'] != None:
-          self.pin_reset = Pin(gpio['reset'], Pin.OUT, Pin.PULL_UP)
-          self.pin_reset.value(1)
+        if gpio['led'] != None:
+          self.pin_led = gpio['led']
+          self.pin_led.value(0) # LED off
         else:
-          self.pin_reset = None
-        self.pin_dio0 = Pin(gpio['dio0'], Pin.IN,  Pin.PULL_UP)
-        self.pin_cs   = Pin(gpio['cs'],   Pin.OUT, Pin.PULL_UP)
+          self.pin_led = None
+          
+        self.pin_reset = gpio['reset']
+        self.pin_reset.value(1)
+
+        self.pin_dio0 = gpio['dio0']
+
+        if gpio['dio1'] != None:
+          self.pin_dio1 = gpio['dio1']
+        else:
+          self.pin_dio1 = None
+        
+        if gpio['dio2'] != None:
+          self.pin_dio2 = gpio['dio2']
+        else:
+          self.pin_dio2 = None
+
+        if gpio['dio3'] != None:
+          self.pin_dio3 = gpio['dio3']
+        else:
+          self.pin_dio3 = None
+
+        if gpio['dio4'] != None:
+          self.pin_dio4 = gpio['dio4']
+        else:
+          self.pin_dio4 = None
+
+        if gpio['dio5'] != None:
+          self.pin_dio5 = gpio['dio5']
+        else:
+          self.pin_dio5 = None
+
+        self.pin_cs   = gpio['cs']
         self.pin_cs.value(1)
 
-        # init SPI
-        if spi_hardware:
-            if spi_baudrate == None: spi_baudrate = 5000000 # 5MHz
-            if ESP32:
-                self.spi = SPI(1, baudrate=spi_baudrate, polarity=0, phase=0,
-                               sck=Pin(14), mosi=Pin(13), miso=Pin(12))
-            else:
-                self.spi = SPI(1, baudrate=spi_baudrate, polarity=0, phase=0)
-        else:
-            if spi_baudrate == None: spi_baudrate = 500000 # 500kHz
-            self.spi = SPI(-1, baudrate=spi_baudrate, polarity=0, phase=0,
-                           sck=Pin(gpio['sck']),
-                           mosi=Pin(gpio['mosi']),
-                           miso=Pin(gpio['miso']))
-                           #bits=8, firstbit=SPI.MSB, # FIXME
-                           #sck=Pin(gpio['sck'], Pin.OUT, Pin.PULL_DOWN),
-                           #mosi=Pin(gpio['mosi'], Pin.OUT, Pin.PULL_UP),
-                           #miso=Pin(gpio['miso'], Pin.IN, Pin.PULL_UP))
-        self.spi.init()
         self.onReceive(onReceive)        
         #self._lock = False
         self.reset()
